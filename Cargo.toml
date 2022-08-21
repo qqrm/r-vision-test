@@ -1,0 +1,3 @@
+[workspace]
+
+members = ["writer-consumer", "reader-producer", "tests"]
