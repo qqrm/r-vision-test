@@ -28,7 +28,7 @@ mod tests {
             wc.recieve_file(false).unwrap();
         }));
 
-        thread::sleep(time::Duration::from_secs(2));
+        thread::sleep(time::Duration::from_secs(1));
 
         let folder_path =
             current_dir().unwrap().to_str().unwrap().to_owned() + &"/files_to_send/".to_owned();
@@ -90,6 +90,7 @@ mod tests {
 
         let filename = "test_en_min.txt".to_owned();
 
+        // TODO: specify expexted panic
         rp.process_file(filename).unwrap();
 
         for thread in threads.into_iter() {
