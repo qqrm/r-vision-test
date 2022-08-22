@@ -19,10 +19,10 @@ mod tests {
             let nc = nats::connect("0.0.0.0:4222").unwrap();
 
             // different behavior with dubugging, may replace to systdm env var
-            // let write_path = current_dir().unwrap().to_str().unwrap().to_owned()
-            //     + &"/recieved_files/".to_owned();
+            let write_path = current_dir().unwrap().to_str().unwrap().to_owned()
+                + &"/recieved_files/".to_owned();
 
-            let write_path = "/home/qqrm/repos/r-vision-test/tests/recieved_files/".to_owned();
+            // let write_path = "/home/qqrm/repos/r-vision-test/tests/recieved_files/".to_owned();
 
             let wc = WriterConsumer::new(write_path, nc);
             wc.recieve_file(false).unwrap();
@@ -30,10 +30,10 @@ mod tests {
 
         thread::sleep(time::Duration::from_secs(2));
 
-        // let folder_path =
-        //     current_dir().unwrap().to_str().unwrap().to_owned() + &"/files_to_send/".to_owned();
+        let folder_path =
+            current_dir().unwrap().to_str().unwrap().to_owned() + &"/files_to_send/".to_owned();
 
-        let folder_path = "/home/qqrm/repos/r-vision-test/tests/files_to_send/".to_owned();
+        // let folder_path = "/home/qqrm/repos/r-vision-test/tests/files_to_send/".to_owned();
 
         let nc = nats::connect("0.0.0.0:4222").unwrap();
 
@@ -47,9 +47,11 @@ mod tests {
             thread.join().unwrap();
         }
 
-        let etalon_path = "/home/qqrm/repos/r-vision-test/tests/etalon/test_en_min.txt".to_owned();
-        let res_path =
-            "/home/qqrm/repos/r-vision-test/tests/recieved_files/test_en_min.txt".to_owned();
+        let etalon_path = current_dir().unwrap().to_str().unwrap().to_owned()
+            + &"/etalon/test_en_min.txt".to_owned();
+
+        let res_path = current_dir().unwrap().to_str().unwrap().to_owned()
+            + &"/recieved_files/test_en_min.txt".to_owned();
 
         let etalon = File::open(etalon_path).unwrap();
         let res = File::open(res_path).unwrap();
@@ -70,11 +72,8 @@ mod tests {
         threads.push(thread::spawn(move || {
             let nc = nats::connect("0.0.0.0:4222").unwrap();
 
-            // different behavior with dubugging, may replace to systdm env var
-            // let write_path = current_dir().unwrap().to_str().unwrap().to_owned()
-            //     + &"/recieved_files/".to_owned();
-
-            let write_path = "/home/qqrm/repos/r-vision-test/tests/recieved_files/".to_owned();
+            let write_path = current_dir().unwrap().to_str().unwrap().to_owned()
+                + &"/recieved_files/".to_owned();
 
             let wc = WriterConsumer::new(write_path, nc);
             wc.recieve_file(true).unwrap();
@@ -82,10 +81,8 @@ mod tests {
 
         thread::sleep(time::Duration::from_secs(2));
 
-        // let folder_path =
-        //     current_dir().unwrap().to_str().unwrap().to_owned() + &"/files_to_send/".to_owned();
-
-        let folder_path = "/home/qqrm/repos/r-vision-test/tests/files_to_send/".to_owned();
+        let folder_path =
+            current_dir().unwrap().to_str().unwrap().to_owned() + &"/files_to_send/".to_owned();
 
         let nc = nats::connect("0.0.0.0:4222").unwrap();
 
