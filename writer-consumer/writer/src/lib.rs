@@ -49,7 +49,7 @@ impl WriterConsumer {
 
                 WriterConsumer::process_chunk(&mut data_chunk)?;
 
-                file.write(&data_chunk.data)?;
+                file.write_all(&data_chunk.data)?;
 
                 chunk.respond("ok")?;
 

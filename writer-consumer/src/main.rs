@@ -6,7 +6,7 @@ fn main() -> anyhow::Result<()> {
 
     let path = std::env::args()
         .nth(1)
-        .unwrap_or("/home/qqrm/repos/r-vision-test/recieved_files/".to_owned());
+        .unwrap_or_else(|| "/home/qqrm/repos/r-vision-test/recieved_files/".to_owned());
 
     let nc = nats::connect("0.0.0.0:4222")?;
 

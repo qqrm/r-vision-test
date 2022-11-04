@@ -1,0 +1,38 @@
+Тестовое задание для Backend-разработчика 
+
+Обязательная часть: 
+Реализовать приложение, которое осуществляет передачу больших объемов бинарных данных через систему обмена сообщениями NATS (https://nats.io/). Например, приложение может осуществлять передачу файлов JPEG, PNG или файла с UTF-8 текстом, но бинарным заголовком — при передачи данных должен быть понятен формат данных всем сторонам обмена.
+У NATS системы есть ограничения и поэтому нужно передавать чанками. Простой NATS (не JetStream) не хранит сообщения для повторов при ошибках и не обеспечивает внутреннее подтверждение доставки.
+Приложение должно состоять из 2-х сервисов Reader-Producer и Writer-Consumer, которые можно запустить на разных серверах (для тестирования можно запускать 2 сервиса на одной машине, главное чтобы использовался выбранный транспорт, в данном случае NATS).
+Сервис Reader-Producer должен осуществлять чтение и передачу данных по заранее выбранному транспорту. 
+Сервис Writer-Consumer должен принимать данные от сервиса Reader-Producer, обрабатывать их и сохранять. Под обработкой понимается некая допустимая модификация бинарных данных в чанке (картинка не разрушается, но не обязательно должна выглядеть корректно после модификации). Бинарные данные могут быть как UTF8 текст и обработка может свестись к добавлению и удалению некоторых символов из текста (не только latin текста).
+Сами сервисы нужно реализовать без использования готовых больших фреймворков, только на коровых модулях и минимально необходимых модулях для работы с NATS, с бинарными данными. 
+Обработать ситуацию, когда сервис Reader-Producer отправляет сервису Writer-Consumer больше данных в чанке, чем тот может успеть обработать, но весь объем просто будет  передаваться и обрабатываться дольше (допустим 1кб успевает за 1сек, а 10кб уже не успевает за 1сек, нужно больше времени). Добавить предельное время обработки одного чанка и прерывать передачу по таймауту на стороне  Reader-Producer.
+Для примера, перед записью в сервисе Writer-Consumer обрабатывайте входящие данные с помощью этого метода: (псевдокод) process_data(data) { await delay(500ms); return data; } Это будет эмулировать задержку в обработке.
+
+Покрыть тестами в отдельных модулях.
+
+Дополнительно (по возможности): 
+Сервис  Reader-Producer  может быть построен как долгоживущий сервис и запускать чтение и передачу данных по команде через свой REST API.
+Реализовать поддержку различных видов транспорта (например, websockets) 
+Возможно дополнительно поддержать обработку различных видов данных - JSON, YAML, TEXT — можно использовать крейты для парсинга данных форматов.
+
+translate by google
+Test task for backend developer
+
+Mandatory part:
+Implement an application that transfers large amounts of binary data through the NATS messaging system (https://nats.io/). For example, an application can transfer JPEG, PNG files or a file with UTF-8 text, but with a binary header - when transferring data, the data format must be clear to all parties of the exchange.
+The NATS system has limitations and therefore must be transmitted in chunks. Simple NATS (not JetStream) does not store messages for retry on errors and does not provide internal acknowledgment of delivery.
+The application should consist of 2 Reader-Producer and Writer-Consumer services that can be run on different servers (for testing, you can run 2 services on the same machine, the main thing is that the selected transport is used, in this case NATS).
+The Reader-Producer service must read and transmit data over a pre-selected transport.
+The Writer-Consumer service must receive data from the Reader-Producer service, process it, and store it. Processing is understood as some admissible modification of binary data in a chunk (the picture is not destroyed, but it does not have to look correct after modification). Binary data can be as UTF8 text and processing can be reduced to adding and removing some characters from the text (not just latin text).
+The services themselves need to be implemented without using ready-made large frameworks, only on core modules and the minimum required modules for working with NATS, with binary data.
+Handle the situation when the Reader-Producer service sends more data in a chunk to the Writer-Consumer service than it can process, but the entire volume will simply be transferred and processed longer (let's say 1kb is in time in 1sec, and 10kb is no longer in time in 1sec, you need more time). Add a time limit for processing one chunk and timeout the transfer on the Reader-Producer side.
+For example, before writing to the Writer-Consumer service, process incoming data using this method: (pseudocode) process_data(data) { await delay(500ms); returndata; } This will emulate a delay in processing.
+
+Cover with tests in separate modules.
+
+Optional (if possible):
+The Reader-Producer service can be built as a long-lived service and start reading and transmitting data on command through its REST API.
+Implement support for various transport modes (for example, websockets)
+It is possible to additionally support the processing of various types of data - JSON, YAML, TEXT - you can use crates to parse these formats.

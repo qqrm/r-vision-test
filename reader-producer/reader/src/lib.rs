@@ -45,7 +45,6 @@ impl ReaderProducer {
             };
 
             let bin_data = serialize(&chunk)?;
-            // let _ = self.nc.request("data_chunk", bin_data)?;
 
             let _ = self
                 .nc
