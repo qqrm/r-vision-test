@@ -1,41 +1,47 @@
 #[cfg(test)]
 mod tests {
-    use core::time;
+    use std::env::current_dir;
     use std::{
         fs::File,
         io::{BufRead, BufReader},
         thread,
+        time::Duration,
     };
 
     use reader::ReaderProducer;
-    use std::env::current_dir;
     use writer::WriterConsumer;
 
     #[test]
     fn send_ru_min_txt() {
-        thread::scope(|s| {
-            s.spawn(move || {
-                let nc = nats::connect("0.0.0.0:4222").unwrap();
-
-                // different behavior with dubugging, may replace to systdm env var
-                let write_path = current_dir().unwrap().to_str().unwrap().to_owned()
-                    + &"/recieved_files/".to_owned();
-
-                let wc = WriterConsumer::new(write_path, nc);
-                wc.recieve_file(false).unwrap();
-            });
+        // Spawn a new thread for receiving the file.
+        thread::spawn(|| {
+            let nc = nats::connect("0.0.0.0:4222").expect("Failed to connect to NATS");
+            let write_path = format!(
+                "{}/recieved_files/",
+                current_dir()
+                    .expect("Failed to get current directory")
+                    .to_str()
+                    .expect("Failed to convert path to string")
+            );
+            let wc = WriterConsumer::new(write_path, nc);
+            wc.receive_file(false).expect("Failed to receive file");
         });
 
-        thread::sleep(time::Duration::from_secs(1));
+        // Sleep to make sure the above thread is ready.
+        thread::sleep(Duration::from_secs(1));
 
-        let folder_path =
-            current_dir().unwrap().to_str().unwrap().to_owned() + &"/files_to_send/".to_owned();
-
-        let nc = nats::connect("0.0.0.0:4222").unwrap();
+        // Perform the send operation.
+        let folder_path = format!(
+            "{}/files_to_send/",
+            current_dir()
+                .expect("Failed to get current directory")
+                .to_str()
+                .expect("Failed to convert path to string")
+        );
+        let nc = nats::connect("0.0.0.0:4222").expect("Failed to connect to NATS");
         let rp = ReaderProducer::new(folder_path, nc, 4096);
-        let filename = "test_en_min.txt".to_owned();
-
-        rp.process_file(filename).unwrap();
+        rp.process_file("test_en_min.txt".to_owned())
+            .expect("Failed to process file");
 
         let etalon_path = current_dir().unwrap().to_str().unwrap().to_owned()
             + &"/etalon/test_en_min.txt".to_owned();
@@ -55,30 +61,39 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic] // various panics
     fn send_ru_min_txt_with_delay() {
-        thread::scope(|s| {
-            s.spawn(move || {
-                let nc = nats::connect("0.0.0.0:4222").unwrap();
+        // Similar to the first test, but with a delay in the receiver.
 
-                let write_path = current_dir().unwrap().to_str().unwrap().to_owned()
-                    + &"/recieved_files/".to_owned();
-
-                let wc = WriterConsumer::new(write_path, nc);
-                wc.recieve_file(true).unwrap();
-            });
+        thread::spawn(|| {
+            let nc = nats::connect("0.0.0.0:4222").expect("Failed to connect to NATS");
+            let write_path = format!(
+                "{}/recieved_files/",
+                current_dir()
+                    .expect("Failed to get current directory")
+                    .to_str()
+                    .expect("Failed to convert path to string")
+            );
+            let wc = WriterConsumer::new(write_path, nc);
+            wc.receive_file(true).expect("Failed to receive file");
         });
 
-        thread::sleep(time::Duration::from_secs(2));
+        // Sleep to give the receiver a head start.
+        thread::sleep(Duration::from_secs(2));
 
-        let folder_path =
-            current_dir().unwrap().to_str().unwrap().to_owned() + &"/files_to_send/".to_owned();
-
-        let nc = nats::connect("0.0.0.0:4222").unwrap();
+        // Perform the send operation here, expecting a panic.
+        let folder_path = format!(
+            "{}/files_to_send/",
+            current_dir()
+                .expect("Failed to get current directory")
+                .to_str()
+                .expect("Failed to convert path to string")
+        );
+        let nc = nats::connect("0.0.0.0:4222").expect("Failed to connect to NATS");
         let rp = ReaderProducer::new(folder_path, nc, 4096);
-        let filename = "test_en_min.txt".to_owned();
 
-        // TODO: specify expexted panic
-        rp.process_file(filename).unwrap();
+        // This is expected to panic, hence the #[should_panic] attribute.
+        rp.process_file("test_en_min.txt".to_owned())
+            .expect("Failed to process file");
     }
 }
